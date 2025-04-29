@@ -1,0 +1,185 @@
+/**
+ * This view is responsible for identifying the best-matching rule or exemption for a given Journal Entry (JE) Item.
+ *
+ * Since both Classification Rules and Exemption Rules treat empty fields as a wildcard (*), it is possible—and highly probable—that
+ * multiple rules or exemptions may apply to a single JE Item. This view takes this into account, calculates the best match based on a Score,
+ * and assigns it to the given JE Item.
+ *
+ * The Score is determined by the number of input fields that are filled in the rule or exemption. If multiple rules or exemptions share the same score,
+ * the view assigns the one with the highest Rule ID (which is likely the most recent one).
+ *
+ * Intercompany Basis View Hierarchy:
+ * ZR_IntercoJEItemClass
+ *  - ZI_IntercoJEItemClass
+ *      - ZI_IntercoJEItemClassMatch <------- CURRENT VIEW
+ *          - ZI_IntercoJEItemClassRule
+ *              - ZI_IntercoJEItemPandL
+ *                  - ZI_IntercoJEItem
+ */
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'JE Item Best Classification Match'
+@Metadata.ignorePropagatedAnnotations: false
+@ObjectModel.usageType:{
+    serviceQuality: #X,
+    sizeCategory: #XXL,
+    dataClass: #MIXED
+}
+
+define view entity ZI_IntercoJEItemClassMatch
+  as select from ZI_IntercoJEItemClassRule
+{
+  key SourceLedger,
+  key CompanyCode,
+  key FiscalYear,
+  key FiscalPeriod,
+  key AccountingDocument,
+  key LedgerGLLineItem,
+  key Ledger,
+
+      Segment,
+      AccountingDocumentType,
+      AccountingDocumentItem,
+      DebitCreditCode,
+      AccountingDocumentCategory,
+      LedgerFiscalYear,
+      ClearingAccountingDocument,
+      ClearingJournalEntry,
+      ClearingDate,
+      ClearingDocFiscalYear,
+      ClearingJournalEntryFiscalYear,
+      IsOpenItemManaged,
+      TransactionCurrency,
+      AmountInTransactionCurrency,
+      CompanyCodeCurrency,
+      AmountInCompanyCodeCurrency,
+      GlobalCurrency,
+      AmountInGlobalCurrency,
+      CreationDate,
+      FiscalYearPeriod,
+      OriginObjectType,
+
+      ProfitCenter,
+      PostingDate,
+      CreationDateTime,
+      CostCenter,
+      ControllingArea,
+      PaymentType,
+      CostCenterStandardHierArea,
+      ChartOfAccounts,
+      GLAccount,
+      GLAccountHierarchy,
+      GLAccountHierarchyNode,
+      GLAccountParentNode,
+      CCConsolidationHierarchy,
+      CCConsolidationHierarchyNode,
+      CCConsolidationParentNode,
+      CCConsolidation,
+      PCConsolidationHierarchy,
+      PCConsolidationHierarchyNode,
+      PCConsolidationParentNode,
+      PCConsolidation,
+      CCAllocationHierarchy,
+      CCAllocationHierarchyNode,
+      CCAllocationParentNode,
+      CCAllocation,
+      zagrup_cuentas,
+      zconsolidation,
+      PandLL0Id,
+      PandLL1Id,
+      PandLL2Id,
+      PandLL3Id,
+      PandLL4Id,
+      PandLL5Id,
+      CCStdHierarchy,
+      CCStdParentNode,
+      PCBusinessUnit,
+      PCSubBusinessUnitGroup,
+      PCSubBusinessUnit,
+      max(concat(cast(ClassificationRuleScore as abap.char(36) ), concat('-', cast(ClassificationRuleExtID as abap.char(10))))) as BestMatchClassificationRule,
+      max(concat(cast(ExemptionScore as abap.char(36) ), concat('-', cast(ExemptionExtID as abap.char(10)))))                   as BestMatchExemption,
+      /* Associations */
+      _CCAllocationHierarchyNode,
+      _CCConsolidationHierarchyNode,
+      _CCConsolidationParentNode,
+      _GLAccountHierarchyNode,
+      _GLAccountParentNode,
+      _IntercoCompanyCode,
+      _MT005,
+      _PCConsolidationHierarchyNode,
+      _PCConsolidationParentNode,
+      _CCAllocationParentNode,
+      _CurrentCostCenter,
+      _CurrentProfitCenter,
+      _CCStdHierarchyNode,
+      _CCStdParentNode,
+      _PCHierarchyFlat
+}
+group by
+  SourceLedger,
+  CompanyCode,
+  FiscalYear,
+  FiscalPeriod,
+  AccountingDocument,
+  LedgerGLLineItem,
+  Ledger,
+
+  Segment,
+  AccountingDocumentType,
+  AccountingDocumentItem,
+  DebitCreditCode,
+  AccountingDocumentCategory,
+  LedgerFiscalYear,
+  ClearingAccountingDocument,
+  ClearingJournalEntry,
+  ClearingDate,
+  ClearingDocFiscalYear,
+  ClearingJournalEntryFiscalYear,
+  IsOpenItemManaged,
+  TransactionCurrency,
+  AmountInTransactionCurrency,
+  CompanyCodeCurrency,
+  AmountInCompanyCodeCurrency,
+  GlobalCurrency,
+  AmountInGlobalCurrency,
+  CreationDate,
+  FiscalYearPeriod,
+  OriginObjectType,
+
+  ProfitCenter,
+  PostingDate,
+  CreationDateTime,
+  CostCenter,
+  ControllingArea,
+  PaymentType,
+  CostCenterStandardHierArea,
+  ChartOfAccounts,
+  GLAccount,
+  GLAccountHierarchy,
+  GLAccountHierarchyNode,
+  GLAccountParentNode,
+  CCConsolidationHierarchy,
+  CCConsolidationHierarchyNode,
+  CCConsolidationParentNode,
+  CCConsolidation,
+  PCConsolidationHierarchy,
+  PCConsolidationHierarchyNode,
+  PCConsolidationParentNode,
+  PCConsolidation,
+  CCAllocationHierarchy,
+  CCAllocationHierarchyNode,
+  CCAllocationParentNode,
+  CCAllocation,
+  zagrup_cuentas,
+  zconsolidation,
+  CCStdHierarchy,
+  CCStdParentNode,
+  PCBusinessUnit,
+  PCSubBusinessUnitGroup,
+  PCSubBusinessUnit,
+  PandLL0Id,
+  PandLL1Id,
+  PandLL2Id,
+  PandLL3Id,
+  PandLL4Id,
+  PandLL5Id
